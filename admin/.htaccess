@@ -1,0 +1,29 @@
+# Admin panel served at http://localhost/events/admin/
+Options -Indexes
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+	Options +FollowSymlinks
+	RewriteEngine On
+
+	# Block direct access to framework folders and private files
+	RewriteRule ^(app|system|writable|tests|vendor)(/|$) - [F,L]
+	RewriteRule ^(\.env|env|spark|preload\.php|composer\.(json|lock)|phpunit.*\.xml.*|LICENSE|README\.md)$ - [F,L]
+
+	# Static files live in public/
+	RewriteRule ^(assets/.*|favicon\.ico|robots\.txt)$ public/$1 [L]
+
+	# Everything else goes to the CodeIgniter front controller
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteRule ^(.*)$ index.php/$1 [L,QSA]
+
+	# Ensure Authorization header is passed along
+	RewriteCond %{HTTP:Authorization} .
+	RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+	ErrorDocument 404 index.php
+</IfModule>
+
+ServerSignature Off
